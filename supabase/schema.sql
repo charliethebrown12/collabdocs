@@ -39,6 +39,6 @@ INSERT INTO documents (id, owner_id, title, content_json) VALUES
     'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     '11111111-1111-4111-8111-111111111111',
     'Welcome to CollabDocs',
-    '{"type":"doc","content":[{"type":"heading","attrs":{"level":1},"content":[{"type":"text","text":"Welcome"}]},{"type":"paragraph","content":[{"type":"text","text":"This is Alice'\''s starter document."}]}]}'::jsonb
+    '{"type":"doc","content":[{"type":"heading","attrs":{"level":1},"content":[{"type":"text","text":"Welcome"}]},{"type":"paragraph","content":[{"type":"text","text":"This is Alice''s starter document."}]}]}'::jsonb
   )
 ON CONFLICT (id) DO NOTHING;
