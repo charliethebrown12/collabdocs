@@ -6,6 +6,8 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     port: 5173,
+    // Allow Cloudflare quick tunnels / preview hosts during demos
+    allowedHosts: true,
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
