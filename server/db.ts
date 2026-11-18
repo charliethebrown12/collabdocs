@@ -5,17 +5,30 @@ dns.setDefaultResultOrder('ipv4first')
 
 const { Pool } = pg
 
-const connectionString = process.env.DATABASE_URL
+let pool: pg.Pool | null = null
 
-if (!connectionString) {
-  throw new Error('DATABASE_URL is required')
+/** Lazy pool so serverless cold start can serve /api/health without DATABASE_URL. */
+export function getPool(): pg.Pool {
+  if (pool) return pool
+
+  const connectionString = process.env.DATABASE_URL
+  if (!connectionString) {
+    throw new Error('DATABASE_URL is not configured')
+  }
+
+  pool = new Pool({
+    connectionString,
+    ssl: { rejectUnauthorized: false },
+    // Serverless-friendly: avoid exhausting Supabase pooler slots
+    max: process.env.VERCEL ? 1 : 10,
+  })
+
+  return pool
 }
 
-export const pool = new Pool({
-  connectionString,
-  ssl: { rejectUnauthorized: false },
-  max: 10,
-})
+export function isDatabaseConfigured(): boolean {
+  return Boolean(process.env.DATABASE_URL)
+}
 
 export type User = {
   id: string
@@ -44,7 +57,7 @@ export async function getUserAccess(
   documentId: string,
   userId: string,
 ): Promise<AccessLevel> {
-  const result = await pool.query<{
+  const result = await getPool().query<{
     is_owner: boolean
     permission: 'read' | 'write' | null
   }>(
