@@ -87,7 +87,17 @@ npm start
 
 Serves the Vite `dist/` build and `/api/*` from one Node process.
 
-For Vercel: set `DATABASE_URL` in project env vars, then deploy. See `ARCHITECTURE.md`.
+### Vercel
+
+Production: https://collabdocs-orpin.vercel.app/
+
+Set **Production** (and Preview if desired) env:
+
+| Name | Purpose |
+|------|---------|
+| `DATABASE_URL` | Supabase Postgres pooler URI (IPv4), e.g. `postgresql://postgres.<ref>:<password>@aws-0-us-west-2.pooler.supabase.com:6543/postgres` |
+
+Do not commit secrets. After setting env, redeploy so serverless functions pick it up. See `ARCHITECTURE.md`.
 
 ## Docs
 

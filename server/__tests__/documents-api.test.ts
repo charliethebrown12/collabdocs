@@ -2,7 +2,7 @@ import 'dotenv/config'
 import request from 'supertest'
 import { afterAll, describe, expect, it } from 'vitest'
 import { createApp } from '../app.js'
-import { pool } from '../db.js'
+import { getPool } from '../db.js'
 
 const ALICE = '11111111-1111-4111-8111-111111111111'
 const BOB = '22222222-2222-4222-8222-222222222222'
@@ -14,10 +14,11 @@ describe.skipIf(!hasDb)('documents API access control', () => {
   let docId = ''
 
   afterAll(async () => {
+    const db = getPool()
     if (docId) {
-      await pool.query('DELETE FROM documents WHERE id = $1', [docId])
+      await db.query('DELETE FROM documents WHERE id = $1', [docId])
     }
-    await pool.end()
+    await db.end()
   })
 
   it('creates a document for Alice and denies Bob until shared', async () => {

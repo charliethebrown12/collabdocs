@@ -5,8 +5,9 @@ import {
   canRead,
   canShare,
   canWrite,
+  getPool,
   getUserAccess,
-  pool,
+  isDatabaseConfigured,
   type DocumentRow,
   type User,
 } from './db.js'
@@ -36,7 +37,7 @@ async function requireDemoUser(
   }
 
   try {
-    const user = await pool.query<User>(
+    const user = await getPool().query<User>(
       'SELECT id, display_name FROM users WHERE id = $1',
       [parsed.data],
     )
@@ -47,7 +48,9 @@ async function requireDemoUser(
     next()
   } catch (err) {
     console.error(err)
-    res.status(500).json({ error: 'Failed to resolve demo user' })
+    const message = err instanceof Error ? err.message : 'Failed to resolve demo user'
+    const status = message.includes('DATABASE_URL') ? 503 : 500
+    res.status(status).json({ error: message })
   }
 }
 
@@ -57,18 +60,23 @@ export function createApp() {
   app.use(express.json({ limit: '2mb' }))
 
   app.get('/api/health', (_req, res) => {
-    res.json({ ok: true })
+    res.json({
+      ok: true,
+      databaseConfigured: isDatabaseConfigured(),
+    })
   })
 
   app.get('/api/users', async (_req, res) => {
     try {
-      const result = await pool.query<User>(
+      const result = await getPool().query<User>(
         'SELECT id, display_name FROM users ORDER BY display_name',
       )
       res.json({ users: result.rows })
     } catch (err) {
       console.error(err)
-      res.status(500).json({ error: 'Failed to load users' })
+      const message = err instanceof Error ? err.message : 'Failed to load users'
+      const status = message.includes('DATABASE_URL') ? 503 : 500
+      res.status(status).json({ error: message })
     }
   })
 
@@ -78,7 +86,7 @@ export function createApp() {
   api.get('/documents', async (_req, res) => {
     const user = res.locals.user as User
     try {
-      const result = await pool.query<
+      const result = await getPool().query<
         DocumentRow & { access: 'owner' | 'write' | 'read' }
       >(
         `SELECT d.id, d.owner_id, d.title, d.created_at, d.updated_at,
@@ -119,7 +127,7 @@ export function createApp() {
     }
 
     try {
-      const result = await pool.query<DocumentRow>(
+      const result = await getPool().query<DocumentRow>(
         `INSERT INTO documents (owner_id, title, content_json)
          VALUES ($1, $2, $3::jsonb)
          RETURNING id, owner_id, title, content_json, created_at, updated_at`,
@@ -149,7 +157,7 @@ export function createApp() {
           .json({ error: 'You do not have access to this document' })
       }
 
-      const result = await pool.query<DocumentRow>(
+      const result = await getPool().query<DocumentRow>(
         `SELECT id, owner_id, title, content_json, created_at, updated_at
          FROM documents WHERE id = $1`,
         [id.data],
@@ -194,7 +202,7 @@ export function createApp() {
           .json({ error: 'You do not have write access to this document' })
       }
 
-      const result = await pool.query<DocumentRow>(
+      const result = await getPool().query<DocumentRow>(
         `UPDATE documents SET
            title = COALESCE($2, title),
            content_json = COALESCE($3::jsonb, content_json),
@@ -231,7 +239,7 @@ export function createApp() {
         return res.status(403).json({ error: 'Only the owner can view shares' })
       }
 
-      const result = await pool.query(
+      const result = await getPool().query(
         `SELECT s.id, s.document_id, s.user_id, s.permission, u.display_name
          FROM document_shares s
          JOIN users u ON u.id = s.user_id
@@ -278,7 +286,7 @@ export function createApp() {
           .json({ error: 'Cannot share a document with its owner' })
       }
 
-      const target = await pool.query<User>(
+      const target = await getPool().query<User>(
         'SELECT id, display_name FROM users WHERE id = $1',
         [body.data.user_id],
       )
@@ -286,7 +294,7 @@ export function createApp() {
         return res.status(404).json({ error: 'Target user not found' })
       }
 
-      const result = await pool.query(
+      const result = await getPool().query(
         `INSERT INTO document_shares (document_id, user_id, permission)
          VALUES ($1, $2, $3)
          ON CONFLICT (document_id, user_id)
@@ -321,7 +329,7 @@ export function createApp() {
         return res.status(403).json({ error: 'Only the owner can revoke shares' })
       }
 
-      const result = await pool.query(
+      const result = await getPool().query(
         `DELETE FROM document_shares
          WHERE id = $1 AND document_id = $2
          RETURNING id`,

@@ -37,7 +37,9 @@ https://github.com/charliethebrown12/collabdocs
 
 ## Live URL
 
-_Pending deployment — will be updated when hosted._
+https://collabdocs-orpin.vercel.app/
+
+Requires Vercel Production env var `DATABASE_URL` (Supabase Postgres pooler URI). Without it, `/api/*` fails while the static UI still loads.
 
 ## Design notes for production
 
