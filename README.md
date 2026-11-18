@@ -102,5 +102,7 @@ Do not commit secrets. After setting env, redeploy so serverless functions pick 
 ## Docs
 
 - `ARCHITECTURE.md` — system design
-- `AI_WORKFLOW.md` — how the agent built this
-- `SUBMISSION.md` — assessment submission notes
+- `AI_WORKFLOW.md` — Cursor / Vercel / verification notes (honest tool account)
+- `SUBMISSION.md` — assessment links, reviewer testing, deployment status
+- `WALKTHROUGH_SCRIPT.md` — 3–5 minute demo script
+- `VIDEO_LINK.txt` — walkthrough video URL (**placeholder** until recorded)

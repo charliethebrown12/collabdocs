@@ -1,0 +1,17 @@
+# Walkthrough video URL
+#
+# STATUS: PLACEHOLDER — video not recorded / not linked yet.
+# Do NOT treat any invented YouTube, Loom, or Drive URL as real.
+#
+# When the walkthrough is uploaded, replace the line below with the real public URL
+# (and remove the PLACEHOLDER marker).
+
+VIDEO_URL=PLACEHOLDER_REPLACE_WITH_RECORDED_WALKTHROUGH_URL
+
+# Suggested destinations after recording:
+# - YouTube (unlisted) or Loom share link
+# - Also paste the same URL into the Ajaia Drive submission package
+#
+# Script to follow while recording: WALKTHROUGH_SCRIPT.md
+# App under demo: https://collabdocs-orpin.vercel.app/
+# Repo: https://github.com/charliethebrown12/collabdocs
